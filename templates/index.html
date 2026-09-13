@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot Duprie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            background: #f0f0f0;
+        }
+        #chat-box {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 12px;
+            max-width: 80%;
+        }
+        .user {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        .bot {
+            background: #e5e5e5;
+            color: black;
+        }
+        #input-area {
+            display: flex;
+        }
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            margin-left: 8px;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>🤖 Chatbot Duprie</h2>
+    <div id="chat-box"></div>
+    <div id="input-area">
+        <input type="text" id="message-input" placeholder="Écris ton message...">
+        <button onclick="envoyerMessage()">Envoyer</button>
+    </div>
+
+    <script>
+        async function envoyerMessage() {
+            const input = document.getElementById("message-input");
+            const message = input.value.trim();
+            if (!message) return;
+
+            afficherMessage(message, "user");
+            input.value = "";
+
+            const response = await fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: message })
+            });
+
+            const data = await response.json();
+            afficherMessage(data.reply, "bot");
+        }
+
+        function afficherMessage(texte, type) {
+            const chatBox = document.getElementById("chat-box");
+            const div = document.createElement("div");
+            div.className = "message " + type;
+            div.textContent = texte;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        document.getElementById("message-input").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") envoyerMessage();
+        });
+    </script>
+</body>
+</html>
