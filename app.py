@@ -3,20 +3,39 @@ import json
 from flask import Flask, render_template, request, jsonify
 from dotenv import load_dotenv
 from groq import Groq
+from datetime import datetime
+
+def get_heure_actuelle():
+    maintenant = datetime.now()
+    return maintenant.strftime("%H:%M:%S le %d/%m/%Y")
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_heure_actuelle",
+            "description": "Retourne l'heure et la date actuelles",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    }
+]
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = Flask(__name__)
 
-# Historique global (simple pour l'instant, une seule conversation)
 if os.path.exists("conversation.json"):
     with open("conversation.json", "r") as f:
         historique = json.load(f)
 else:
     historique = [
-        {"role": "system", "content": "Tu t'appelles Duprie. Tu es enthousiaste et tu utilises parfois des emojis. Si on te demande si tu es ChatGPT ou un autre assistant, réponds que non, tu es Duprie. Réponds toujours en texte simple, sans Markdown (pas de #, pas de **, pas de tableaux, pas de listes à puces avec des tirets). Reste concis : 2-4 phrases maximum sauf si on te demande explicitement plus de détails."}
-         ]
+        {"role": "system", "content": "Tu t'appelles Duprie. Tu es enthousiaste et tu utilises parfois des emojis. Si on te demande si tu es ChatGPT ou un autre assistant, reponds que non, tu es Duprie. Reponds toujours en texte simple, sans Markdown. Reste concis : 2-4 phrases maximum sauf si on te demande explicitement plus de details."}
+    ]
 
 @app.route("/")
 def home():
@@ -31,10 +50,46 @@ def chat():
 
     try:
         response = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
-            messages=historique
+            model="openai/gpt-oss-120b",
+            messages=historique,
+            tools=tools
         )
-        bot_reply = response.choices[0].message.content
+        message = response.choices[0].message
+
+        if message.tool_calls:
+            historique.append({
+                "role": "assistant",
+                "content": message.content,
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments
+                        }
+                    } for tc in message.tool_calls
+                ]
+            })
+
+            for tool_call in message.tool_calls:
+                if tool_call.function.name == "get_heure_actuelle":
+                    resultat = get_heure_actuelle()
+
+                historique.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": resultat
+                })
+
+            response2 = client.chat.completions.create(
+                model="openai/gpt-oss-120b",
+                messages=historique
+            )
+            bot_reply = response2.choices[0].message.content
+        else:
+            bot_reply = message.content
+
         historique.append({"role": "assistant", "content": bot_reply})
 
         with open("conversation.json", "w") as f:
