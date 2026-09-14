@@ -9,8 +9,8 @@
             max-width: 600px;
             margin: 40px auto;
             background: #fcfcfc;
-            border-color: #032d5b;
-            border-width: 5px;
+            border-color: #e7210b;
+            border-width: 50px;
         }
         #chat-box {
             background: white;
@@ -54,6 +54,10 @@
             border-radius: 8px;
             cursor: pointer;
         }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -95,6 +99,18 @@
         document.getElementById("message-input").addEventListener("keypress", function(e) {
             if (e.key === "Enter") envoyerMessage();
         });
+
+async function chargerHistorique() {
+    const response = await fetch("/history");
+    const messages = await response.json();
+    messages.forEach(msg => {
+        afficherMessage(msg.content, msg.role === "user" ? "user" : "bot");
+    });
+}
+
+chargerHistorique();
+
+
     </script>
 </body>
 </html>

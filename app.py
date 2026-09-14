@@ -85,6 +85,15 @@ else:
 def home():
     return render_template("index.html")
 
+@app.route("/history")
+def history():
+    messages_affichables = [
+        {"role": m["role"], "content": m["content"]}
+        for m in historique
+        if m["role"] in ["user", "assistant"] and m.get("content")
+    ]
+    return jsonify(messages_affichables)
+
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
