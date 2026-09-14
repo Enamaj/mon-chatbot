@@ -9,6 +9,8 @@ def get_heure_actuelle():
     maintenant = datetime.now()
     return maintenant.strftime("%H:%M:%S le %d/%m/%Y")
 
+
+
 def calculer(operation, a, b):
     if operation == "addition":
         return a + b
@@ -36,8 +38,35 @@ tools = [
                 "required": []
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "calculer",
+            "description": "Effectue une operation mathematique de base (addition, soustraction, multiplication, division) sur deux nombres.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "operation": {
+                        "type": "string",
+                        "enum": ["addition", "soustraction", "multiplication", "division"],
+                        "description": "L'operation a effectuer."
+                    },
+                    "a": {
+                        "type": "number",
+                        "description": "Le premier nombre."
+                    },
+                    "b": {
+                        "type": "number",
+                        "description": "Le deuxieme nombre."
+                    }
+                },
+                "required": ["operation", "a", "b"]
+            }
+        }
     }
 ]
+
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -91,6 +120,12 @@ def chat():
             for tool_call in message.tool_calls:
                 if tool_call.function.name == "get_heure_actuelle":
                     resultat = get_heure_actuelle()
+                elif tool_call.function.name == "calculer":
+                    args = json.loads(tool_call.function.arguments)
+                    operation = args.get("operation")
+                    a = args.get("a")
+                    b = args.get("b")
+                    resultat = str(calculer(operation, a, b))
 
                 historique.append({
                     "role": "tool",
