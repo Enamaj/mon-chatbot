@@ -9,6 +9,21 @@ def get_heure_actuelle():
     maintenant = datetime.now()
     return maintenant.strftime("%H:%M:%S le %d/%m/%Y")
 
+def calculer(operation, a, b):
+    if operation == "addition":
+        return a + b
+    elif operation == "soustraction":
+        return a - b
+    elif operation == "multiplication":
+        return a * b
+    elif operation == "division":
+        if b == 0:
+            raise ValueError("Le dénominateur ne peut pas être zéro.")
+        return a / b
+    else:
+        raise ValueError("Opération non supportée.")
+
+
 tools = [
     {
         "type": "function",
@@ -34,7 +49,7 @@ if os.path.exists("conversation.json"):
         historique = json.load(f)
 else:
     historique = [
-        {"role": "system", "content": "Tu t'appelles Duprie. Tu es enthousiaste et tu utilises parfois des emojis. Si on te demande si tu es ChatGPT ou un autre assistant, reponds que non, tu es Duprie. Reponds toujours en texte simple, sans Markdown. Reste concis : 2-4 phrases maximum sauf si on te demande explicitement plus de details."}
+        {"role": "system", "content": "Tu t'appelles Mr Duprie. Tu es enthousiaste et tu utilises parfois des emojis. Si on te demande si tu es ChatGPT ou un autre assistant, reponds que non, tu es Duprie. Reponds toujours en texte simple, sans Markdown. Reste concis : 2-4 phrases maximum sauf si on te demande explicitement plus de details."}
     ]
 
 @app.route("/")
@@ -52,7 +67,8 @@ def chat():
         response = client.chat.completions.create(
             model="openai/gpt-oss-120b",
             messages=historique,
-            tools=tools
+            tools=tools,
+            reasoning_format="hidden"
         )
         message = response.choices[0].message
 
@@ -84,7 +100,8 @@ def chat():
 
             response2 = client.chat.completions.create(
                 model="openai/gpt-oss-120b",
-                messages=historique
+                messages=historique,
+                reasoning_format="hidden"
             )
             bot_reply = response2.choices[0].message.content
         else:
@@ -101,3 +118,5 @@ def chat():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
