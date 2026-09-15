@@ -3,62 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Visualize</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 40px auto;
-            background: #fcfcfc;
-            border-color: #e7210b;
-            border-width: 50px;
-        }
-        #chat-box {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            height: 400px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-        }
-        .message {
-            margin: 8px 0;
-            padding: 8px 12px;
-            border-radius: 12px;
-            max-width: 80%;
-        }
-        .user {
-            background: #007bff;
-            color: white;
-            margin-left: auto;
-            text-align: right;
-        }
-        .bot {
-            background: #e5e5e5;
-            color: black;
-        }
-        #input-area {
-            display: flex;
-        }
-        #message-input {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            padding: 10px 20px;
-            margin-left: 8px;
-            border: none;
-            background: #007bff;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <h2>🤖 Duprie's Chatbot</h2>
