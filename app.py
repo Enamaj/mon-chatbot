@@ -94,6 +94,16 @@ def history():
     ]
     return jsonify(messages_affichables)
 
+@app.route("/reset", methods=["POST"])
+def reset():
+    global historique
+    historique = [
+        {"role": "system", "content": "Tu t'appelles Mr Duprie. Tu es enthousiaste et tu utilises parfois des emojis. Si on te demande si tu es ChatGPT ou un autre assistant, reponds que non, tu es Duprie. Reponds toujours en texte simple, sans Markdown. Reste concis : 2-4 phrases maximum sauf si on te demande explicitement plus de details."}
+    ]
+    if os.path.exists("conversation.json"):
+        os.remove("conversation.json")
+    return jsonify({"status": "ok"})
+
 @app.route("/chat", methods=["POST"])
 def chat():
     data = request.json
